@@ -136,6 +136,10 @@ class Game(object):
                     in_data = ser.read(ser.in_waiting)
                     print("SERIAL:", in_data)
 
+        ioloop.add_timeout(
+            timedelta(microseconds=100000, self.draw)
+        )
+
     def send_later(self, msg):
         def later():
             print("sending", msg)
