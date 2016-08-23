@@ -83,6 +83,7 @@ class MainHandler(tornado.web.RequestHandler):
 class Game(object):
 
     def __init__(self, *players):
+        self.background = RGB(120, 20, 50)
         print('constructing game')
         self.players = players
         self.timers = []
@@ -91,8 +92,9 @@ class Game(object):
         self.start_game()
 
     def draw(self):
+        self.background.g = (self.background.g + 5) % 255
         # Draw background
-        pixels = [[RGB(120, 20, 50)] * 17 for i in range(11)]
+        pixels = [[self.background] * 17 for i in range(11)]
 
         # Draw positions (boards)
         player1 = self.players[0]
