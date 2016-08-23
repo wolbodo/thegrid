@@ -38,15 +38,18 @@ try:
 
     if ser:
         if ser.in_waiting:
-            data = ser.read(ser.in_waiting)
-            print("SERIAL:", data)
+            in_data = ser.read(ser.in_waiting)
+            print("SERIAL:", in_data)
 
         for (i, line) in enumerate(pixels):
-            ser.write(b'GO{}'.format(''.join(map(str, line))))
+            out_data = b'GO{}'.format(''.join(map(str, line)))
+            print('sending', out_data)
+            ser.write(out_data)
+            print('done sending.')
 
             if ser.in_waiting:
-                data = ser.read(ser.in_waiting)
-                print("SERIAL:", data)
+                in_data = ser.read(ser.in_waiting)
+                print("SERIAL:", in_data)
 
 except:
     print("ERROR: NO SERIAL")
