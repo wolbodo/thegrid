@@ -42,7 +42,7 @@ try:
             print("SERIAL:", in_data)
 
         for (i, line) in enumerate(pixels):
-            out_data = b'GO{}'.format(''.join(map(str, line)))
+            out_data = b'GO{}{}'.format(chr(i), ''.join(map(str, line)))
             print('sending', out_data)
             ser.write(out_data)
             print('done sending.')
