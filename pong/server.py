@@ -98,11 +98,17 @@ class Game(object):
         player1 = self.players[0]
         player2 = self.players[1]
 
-        for y in range(player1.position - 2, player1.position + 2):
+        for y in range(
+            min(player1.position - 2, 0),
+            max(player1.position + 2, 10)
+        ):
             pixels[y][0] = RGB(50, 255, 0)
             pixels[y][1] = RGB(50, 255, 0)
 
-        for y in range(player2.position - 2, player2.position + 2):
+        for y in range(
+            min(player2.position - 2, 0),
+            max(player2.position + 2, 10)
+        ):
             pixels[y][15] = RGB(50, 0, 255)
             pixels[y][16] = RGB(50, 0, 255)
 
