@@ -11,13 +11,6 @@ import serial
 
 static_root = os.path.join(os.path.dirname(__file__), 'static')
 
-ser = None
-try:
-    acm = raw_input('Which ACM in /dev ? ')
-    ser = serial.Serial('/dev/ttyACM' + acm, 9600)
-except:
-    print("ERROR: NO SERIAL")
-
 
 class RGB(object):
     def __init__(self, r, g, b):
@@ -34,6 +27,20 @@ class RGB(object):
 
     def __str__(self):
         return self.__unicode__()
+
+
+ser = None
+try:
+    acm = raw_input('Which ACM in /dev ? ')
+    ser = serial.Serial('/dev/ttyACM' + acm, 9600)
+
+    pixels = [[RGB(120, 20, 50)] * 17] * 11
+
+    if ser:
+        for (i, line) in enumerate(pixels):
+            ser.write(b'GO{}'.format(''.join(map(str, line))))
+except:
+    print("ERROR: NO SERIAL")
 
 
 class MainHandler(tornado.web.RequestHandler):
