@@ -100,14 +100,14 @@ class Game(object):
 
         for y in range(
             min(player1.position - 2, 0),
-            max(player1.position + 2, 10)
+            player1.position + 2
         ):
             pixels[y][0] = RGB(50, 255, 0)
             pixels[y][1] = RGB(50, 255, 0)
 
         for y in range(
             min(player2.position - 2, 0),
-            max(player2.position + 2, 10)
+            player2.position + 2
         ):
             pixels[y][15] = RGB(50, 0, 255)
             pixels[y][16] = RGB(50, 0, 255)
