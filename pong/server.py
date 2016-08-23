@@ -1,12 +1,24 @@
 
 import os
 import json
-import time
+from datetime import timedelta
+
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
+import serial
+
 static_root = os.path.join(os.path.dirname(__file__), 'static')
+
+try:
+    ser = serial.Serial('/dev/ttyACM0', 9600)
+except:
+    print("ERROR: NO SERIAL")
+
+
+def rgb(r, g, b):
+    return '{}{}{}'.format(chr(r), chr(g), chr(b))
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -18,30 +30,59 @@ class Game(object):
 
     def __init__(self, *players):
         self.players = players
+        self.timers = []
 
         self.start_game()
+
+    def send_later(self, msg):
+        def later():
+            print("sending", msg)
+            for player in self.players:
+                player.write_message(msg)
+        return later
 
     def start_game(self):
         self.ended = False
 
-        for player in self.players:
-            player.write_message('starting game in 3...')
+        self.timers.extend([
+            ioloop.add_timeout(
+                timedelta(seconds=1),
+                self.send_later('starting game in 3...')
+            ),
+            ioloop.add_timeout(
+                timedelta(seconds=2),
+                self.send_later('starting game in 2...')
+            ),
+            ioloop.add_timeout(
+                timedelta(seconds=3),
+                self.send_later('starting game in 1...')
+            ),
+            ioloop.add_timeout(
+                timedelta(seconds=4),
+                self.send_later('GOGOGOGOGO...')
+            ),
+            ioloop.add_timeout(
+                timedelta(seconds=4),
+                self.end_game
+            )
+        ])
 
-        time.sleep(1)
-        for player in self.players:
-            player.write_message('2...')
-
-        time.sleep(1)
-
-        for player in self.players:
-            player.write_message('1...')
-
-        time.sleep(1)
-
-        for player in self.players:
-            player.write_message('GO')
-
+    def end_game(self):
         self.ended = True
+
+    def stop(self):
+        print("Stopping game forced")
+        self.end_game()
+
+        while self.timers:
+            ioloop.remove_timeout(self.timers.pop())
+
+    def contains(self, player):
+        print("Checking for players")
+        if player in self.players:
+            print('player in this game')
+            return True
+        return False
 
 
 class PongHandler(tornado.websocket.WebSocketHandler):
@@ -59,20 +100,31 @@ class PongHandler(tornado.websocket.WebSocketHandler):
         }))
 
     @staticmethod
+    def leave_queue(handler):
+        print("Leaving queue")
+        if handler in PongHandler.queue:
+            print("from queue")
+            PongHandler.queue.remove(handler)
+        elif PongHandler.active_game.contains(handler):
+            print("from game")
+            # Stop current game
+            PongHandler.active_game.stop()
+
+    @staticmethod
     def try_start_game():
         active_game = PongHandler.active_game
 
         print('trying to start game: queue: {}, game: {}'.format(
             len(PongHandler.queue),
-            active_game and active_game.ended
+            active_game and not active_game.ended
         ))
         if (
             (len(PongHandler.queue) >= 2) and
-            not (active_game and active_game.ended)
+            not (active_game and not active_game.ended)
         ):
             print("Starting game")
             # ready to start the game
-            active_game = Game(
+            PongHandler.active_game = Game(
                 PongHandler.queue.pop(0),
                 PongHandler.queue.pop(0),
             )
@@ -85,6 +137,8 @@ class PongHandler(tornado.websocket.WebSocketHandler):
         self.write_message(u"You said: " + message)
 
     def on_close(self):
+        PongHandler.leave_queue(self)
+
         print("WebSocket closed")
 
 
@@ -103,4 +157,5 @@ def make_app():
 if __name__ == "__main__":
     app = make_app()
     app.listen(8888)
-    tornado.ioloop.IOLoop.current().start()
+    ioloop = tornado.ioloop.IOLoop.current()
+    ioloop.start()
