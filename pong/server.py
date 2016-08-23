@@ -29,12 +29,7 @@ class RGB(object):
     def __str__(self):
         return self.__unicode__()
 
-
-ser = None
-try:
-    acm = raw_input('Which ACM in /dev ? ')
-    ser = serial.Serial('/dev/ttyACM' + acm, 9600)
-
+def start_draw():
     pixels = [[RGB(220, 220, 50)] * 17] * 11
 
     if ser:
@@ -52,7 +47,7 @@ try:
                 in_data = ser.read(ser.in_waiting)
                 print("SERIAL:", in_data)
 
-    time.sleep(1)
+    time.sleep(0.2)
     pixels = [[RGB(0, 220, 200)] * 17] * 11
 
     if ser:
@@ -70,6 +65,12 @@ try:
                 in_data = ser.read(ser.in_waiting)
                 print("SERIAL:", in_data)
 
+
+ser = None
+try:
+    acm = raw_input('Which ACM in /dev ? ')
+    ser = serial.Serial('/dev/ttyACM' + acm, 9600)
+    start_draw()
 
 except:
     print("ERROR: NO SERIAL")
@@ -142,7 +143,7 @@ class Game(object):
                     in_data = ser.read(ser.in_waiting)
                     print("SERIAL:", in_data)
 
-        ioloop.add_timeout(
+        self.draw_timeout = ioloop.add_timeout(
             timedelta(microseconds=20000),
             self.draw
         )
@@ -184,6 +185,9 @@ class Game(object):
         ])
 
     def end_game(self):
+        ioloop.remove_timeout(self.draw_timeout)
+        start_draw()
+
         self.ended = True
 
     def stop(self):
