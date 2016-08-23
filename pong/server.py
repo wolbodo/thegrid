@@ -11,7 +11,7 @@ import serial
 
 static_root = os.path.join(os.path.dirname(__file__), 'static')
 
-ser = True
+ser = None
 try:
     ser = serial.Serial('/dev/ttyACM0', 9600)
 except:
@@ -72,8 +72,7 @@ class Game(object):
 
         if ser:
             for (i, line) in enumerate(pixels):
-                print b'GO{}{}'.format(chr(i), ''.join(map(str, line)))
-                # ser.write(b'GO{}'.format(''.join(line)))
+                ser.write(b'GO{}'.format(''.join(line)))
 
     def send_later(self, msg):
         def later():
