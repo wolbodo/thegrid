@@ -137,7 +137,7 @@ class Game(object):
                     print("SERIAL:", in_data)
 
         ioloop.add_timeout(
-            timedelta(microseconds=100000),
+            timedelta(seconds=1),
             self.draw
         )
 
