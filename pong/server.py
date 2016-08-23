@@ -92,7 +92,7 @@ class Game(object):
 
     def draw(self):
         # Draw background
-        pixels = [[RGB(120, 20, 50)] * 17] * 11
+        pixels = [[RGB(120, 20, 50)] * 17 for i in range(11)]
 
         # Draw positions (boards)
         player1 = self.players[0]
