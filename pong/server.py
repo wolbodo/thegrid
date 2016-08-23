@@ -107,7 +107,7 @@ class Game(object):
             if y < 0:
                 y = 0
             elif y > 10:
-                y == 10
+                y = 10
             pixels[y][0] = RGB(50, 255, 0)
             pixels[y][1] = RGB(50, 255, 0)
 
@@ -118,7 +118,7 @@ class Game(object):
             if y < 0:
                 y = 0
             elif y > 10:
-                y == 10
+                y = 10
             pixels[y][15] = RGB(50, 0, 255)
             pixels[y][16] = RGB(50, 0, 255)
 
