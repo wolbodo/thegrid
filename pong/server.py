@@ -34,7 +34,7 @@ try:
     acm = raw_input('Which ACM in /dev ? ')
     ser = serial.Serial('/dev/ttyACM' + acm, 9600)
 
-    pixels = [[RGB(120, 20, 50)] * 17] * 11
+    pixels = [[RGB(220, 220, 50)] * 17] * 11
 
     if ser:
         if ser.in_waiting:
@@ -92,8 +92,18 @@ class Game(object):
                 pixels[y][x] = RGB(255, 255, 255)
 
         if ser:
+            if ser.in_waiting:
+                in_data = ser.read(ser.in_waiting)
+                print("SERIAL:", in_data)
             for (i, line) in enumerate(pixels):
-                ser.write(b'GO{}'.format(''.join(map(str, line))))
+                out_data = b'GO{}{}'.format(chr(i), ''.join(map(str, line)))
+                print('sending', out_data)
+                ser.write(out_data)
+                print('done sending.')
+
+                if ser.in_waiting:
+                    in_data = ser.read(ser.in_waiting)
+                    print("SERIAL:", in_data)
 
     def send_later(self, msg):
         def later():
