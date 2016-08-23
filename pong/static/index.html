@@ -1,0 +1,25 @@
+<!doctype html>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<h1>Pong</h1> 
+
+<script>
+
+var ws = new WebSocket("ws://localhost:8888/socket");
+
+ws.onopen = function() {
+   ws.send("helo");
+};
+ws.onmessage = function (evt) {
+   var data;
+   try {
+   	data = JSON.parse(evt.data);
+   } catch (e) {
+   	data = evt.data
+   }
+   console.log('msg', data);
+};
+
+</script>
