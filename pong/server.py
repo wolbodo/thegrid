@@ -1,6 +1,7 @@
 
 import os
 import json
+import time
 from datetime import timedelta
 
 import tornado.ioloop
@@ -51,6 +52,25 @@ try:
                 in_data = ser.read(ser.in_waiting)
                 print("SERIAL:", in_data)
 
+    time.sleep(1)
+    pixels = [[RGB(0, 220, 200)] * 17] * 11
+
+    if ser:
+        if ser.in_waiting:
+            in_data = ser.read(ser.in_waiting)
+            print("SERIAL:", in_data)
+
+        for (i, line) in enumerate(pixels):
+            out_data = b'GO{}{}'.format(chr(i), ''.join(map(str, line)))
+            print('sending', out_data)
+            ser.write(out_data)
+            print('done sending.')
+
+            if ser.in_waiting:
+                in_data = ser.read(ser.in_waiting)
+                print("SERIAL:", in_data)
+
+
 except:
     print("ERROR: NO SERIAL")
 
@@ -92,6 +112,7 @@ class Game(object):
                 pixels[y][x] = RGB(255, 255, 255)
 
         if ser:
+            print('starting to send data')
             if ser.in_waiting:
                 in_data = ser.read(ser.in_waiting)
                 print("SERIAL:", in_data)
