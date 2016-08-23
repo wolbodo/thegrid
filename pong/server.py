@@ -13,7 +13,8 @@ static_root = os.path.join(os.path.dirname(__file__), 'static')
 
 ser = None
 try:
-    ser = serial.Serial('/dev/ttyACM0', 9600)
+    acm = int(raw_input('Which ACM in /dev ? '))
+    ser = serial.Serial('/dev/ttyACM' + acm, 9600)
 except:
     print("ERROR: NO SERIAL")
 
@@ -72,7 +73,7 @@ class Game(object):
 
         if ser:
             for (i, line) in enumerate(pixels):
-                ser.write(b'GO{}'.format(''.join(line)))
+                ser.write(b'GO{}'.format(''.join(map(str, line))))
 
     def send_later(self, msg):
         def later():
