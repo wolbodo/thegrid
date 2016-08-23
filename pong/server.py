@@ -37,8 +37,17 @@ try:
     pixels = [[RGB(120, 20, 50)] * 17] * 11
 
     if ser:
+        if ser.in_waiting:
+            data = ser.read(ser.in_waiting)
+            print("SERIAL:", data)
+
         for (i, line) in enumerate(pixels):
             ser.write(b'GO{}'.format(''.join(map(str, line))))
+
+            if ser.in_waiting:
+                data = ser.read(ser.in_waiting)
+                print("SERIAL:", data)
+
 except:
     print("ERROR: NO SERIAL")
 
