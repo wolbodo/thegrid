@@ -11,14 +11,28 @@ import serial
 
 static_root = os.path.join(os.path.dirname(__file__), 'static')
 
+ser = True
 try:
     ser = serial.Serial('/dev/ttyACM0', 9600)
 except:
     print("ERROR: NO SERIAL")
 
 
-def rgb(r, g, b):
-    return '{}{}{}'.format(chr(r), chr(g), chr(b))
+class RGB(object):
+    def __init__(self, r, g, b):
+        self.r = r
+        self.g = g
+        self.b = b
+
+    def __unicode__(self):
+        return b'{}{}{}'.format(
+            chr(self.r),
+            chr(self.g),
+            chr(self.b)
+        )
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -31,8 +45,35 @@ class Game(object):
     def __init__(self, *players):
         self.players = players
         self.timers = []
+        self.ball = (8, 5)
 
         self.start_game()
+
+    def draw(self):
+        # Draw background
+        pixels = [[RGB(120, 20, 50)] * 17] * 11
+
+        # Draw positions (boards)
+        player1 = self.players[0]
+        player2 = self.players[1]
+
+        for y in range(player1.position - 2, player1.position + 2):
+            pixels[y][0] = RGB(50, 255, 0)
+            pixels[y][1] = RGB(50, 255, 0)
+
+        for y in range(player2.position - 2, player2.position + 2):
+            pixels[y][15] = RGB(50, 0, 255)
+            pixels[y][16] = RGB(50, 0, 255)
+
+        # Draw ball
+        for x in range(self.ball[0] - 1, self.ball[0] + 1):
+            for y in range(self.ball[1] - 1, self.ball[1] + 1):
+                pixels[y][x] = RGB(255, 255, 255)
+
+        if ser:
+            for (i, line) in enumerate(pixels):
+                print b'GO{}{}'.format(chr(i), ''.join(map(str, line)))
+                # ser.write(b'GO{}'.format(''.join(line)))
 
     def send_later(self, msg):
         def later():
@@ -43,6 +84,8 @@ class Game(object):
 
     def start_game(self):
         self.ended = False
+
+        self.draw()
 
         self.timers.extend([
             ioloop.add_timeout(
@@ -90,6 +133,11 @@ class PongHandler(tornado.websocket.WebSocketHandler):
     active_game = None
     queue = []
 
+    def __init__(self, *args, **kwargs):
+        super(PongHandler, self).__init__(*args, **kwargs)
+
+        self.position = 0
+
     @staticmethod
     def join_queue(handler):
         PongHandler.queue.append(handler)
@@ -105,7 +153,8 @@ class PongHandler(tornado.websocket.WebSocketHandler):
         if handler in PongHandler.queue:
             print("from queue")
             PongHandler.queue.remove(handler)
-        elif PongHandler.active_game.contains(handler):
+        elif (PongHandler.active_game and
+                PongHandler.active_game.contains(handler)):
             print("from game")
             # Stop current game
             PongHandler.active_game.stop()
@@ -134,7 +183,13 @@ class PongHandler(tornado.websocket.WebSocketHandler):
         PongHandler.try_start_game()
 
     def on_message(self, message):
-        self.write_message(u"You said: " + message)
+        print('Received', message)
+        try:
+            data = json.loads(message)
+            if 'position' in data:
+                self.position = data.get('position')
+        except:
+            pass
 
     def on_close(self):
         PongHandler.leave_queue(self)
