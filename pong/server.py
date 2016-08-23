@@ -163,24 +163,20 @@ class Game(object):
 
         self.timers.extend([
             ioloop.add_timeout(
-                timedelta(seconds=1),
+                timedelta(seconds=0.5),
                 self.send_later('starting game in 3...')
             ),
             ioloop.add_timeout(
-                timedelta(seconds=2),
+                timedelta(seconds=1),
                 self.send_later('starting game in 2...')
             ),
             ioloop.add_timeout(
-                timedelta(seconds=3),
+                timedelta(seconds=1.5),
                 self.send_later('starting game in 1...')
             ),
             ioloop.add_timeout(
-                timedelta(seconds=4),
+                timedelta(seconds=2),
                 self.send_later('GOGOGOGOGO...')
-            ),
-            ioloop.add_timeout(
-                timedelta(seconds=4),
-                self.end_game
             )
         ])
 
