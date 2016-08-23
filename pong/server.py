@@ -249,7 +249,7 @@ class PongHandler(tornado.websocket.WebSocketHandler):
         try:
             data = json.loads(message)
             if 'position' in data:
-                self.position = data.get('position')
+                self.position = int(data.get('position'))
         except:
             pass
 

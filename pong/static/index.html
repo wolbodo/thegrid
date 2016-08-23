@@ -19,7 +19,25 @@ ws.onmessage = function (evt) {
    } catch (e) {
    	data = evt.data
    }
+
    console.log('msg', data);
+   if (data === 'msg GOGOGOGOGO...') {
+   	(function() {
+   	  var x = 0;
+
+   	  function send() {
+	   	 ws.send(JSON.stringify({
+	   	 	position: x
+	   	 }))
+	   	 x ++;
+	   	 if (x === 11) {
+	   	 	x = 0;
+	   	 }
+	   	 window.setTimeout(send, 100);
+   	  } 		
+   	 window.setTimeout(send, 100);
+   	})
+   }
 };
 
 </script>
