@@ -265,4 +265,9 @@ if __name__ == "__main__":
     app = make_app()
     app.listen(8888)
     ioloop = tornado.ioloop.IOLoop.current()
-    ioloop.start()
+
+    try:
+        ioloop.start()
+    except KeyboardInterrupt:
+        if ser:
+            ser.close()
