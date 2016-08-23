@@ -13,7 +13,7 @@ static_root = os.path.join(os.path.dirname(__file__), 'static')
 
 ser = None
 try:
-    acm = int(raw_input('Which ACM in /dev ? '))
+    acm = raw_input('Which ACM in /dev ? ')
     ser = serial.Serial('/dev/ttyACM' + acm, 9600)
 except:
     print("ERROR: NO SERIAL")
@@ -44,6 +44,7 @@ class MainHandler(tornado.web.RequestHandler):
 class Game(object):
 
     def __init__(self, *players):
+        print('constructing game')
         self.players = players
         self.timers = []
         self.ball = (8, 5)
@@ -83,6 +84,7 @@ class Game(object):
         return later
 
     def start_game(self):
+        print('starting game')
         self.ended = False
 
         self.draw()
