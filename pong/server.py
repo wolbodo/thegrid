@@ -66,16 +66,6 @@ def start_draw():
                 print("SERIAL:", in_data)
 
 
-ser = None
-try:
-    acm = raw_input('Which ACM in /dev ? ')
-    ser = serial.Serial('/dev/ttyACM' + acm, 9600)
-    start_draw()
-
-except:
-    print("ERROR: NO SERIAL")
-
-
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('index.html')
@@ -164,19 +154,30 @@ class Game(object):
         self.timers.extend([
             ioloop.add_timeout(
                 timedelta(seconds=0.5),
-                self.send_later('starting game in 3...')
+                self.send_later(json.dumps({
+                    'state': 'starting',
+                    'countdown': 3
+                }))
             ),
             ioloop.add_timeout(
                 timedelta(seconds=1),
-                self.send_later('starting game in 2...')
+                self.send_later(json.dumps({
+                    'state': 'starting',
+                    'countdown': 2
+                }))
             ),
             ioloop.add_timeout(
                 timedelta(seconds=1.5),
-                self.send_later('starting game in 1...')
+                self.send_later(json.dumps({
+                    'state': 'starting',
+                    'countdown': 1
+                }))
             ),
             ioloop.add_timeout(
                 timedelta(seconds=2),
-                self.send_later('GOGOGOGOGO...')
+                self.send_later(json.dumps({
+                    'state': 'started'
+                }))
             )
         ])
 
@@ -283,6 +284,16 @@ def make_app():
 
 
 if __name__ == "__main__":
+
+    ser = None
+    for i in range(5):
+        try:
+            ser = serial.Serial('/dev/ttyACM{}'.format(i), 9600)
+            start_draw()
+            break
+        except serial.SerialException:
+            continue
+
     app = make_app()
     app.listen(8888)
     ioloop = tornado.ioloop.IOLoop.current()

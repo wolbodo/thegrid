@@ -2,42 +2,104 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<style>
+    html, body {
+        width: 100%;
+        height: 100%;
+    }
+</style>
 
-<h1>Pong</h1> 
+
 
 <script>
 
 var ws = new WebSocket("ws://" + location.host + "/socket");
+var state = {
+    connected: false,
+}
+
+function merge(obj1, obj2) {
+    for (var attrname in obj2) { obj1[attrname] = obj2[attrname]; }
+}
+
+function draw() {
+
+}
 
 ws.onopen = function() {
-   ws.send("helo");
+   state.connected = true;
 };
 ws.onmessage = function (evt) {
    var data;
    try {
-   	data = JSON.parse(evt.data);
+    data = JSON.parse(evt.data);
+
+    merge(state, data)
+    display();
    } catch (e) {
-   	data = evt.data
+    data = evt.data
    }
 
    console.log('msg', data);
    if (data === 'GOGOGOGOGO...') {
-   	(function() {
-   	  var x = 0;
+    (function() {
+      var x = 0;
 
-   	  function send() {
-	   	 ws.send(JSON.stringify({
-	   	 	position: x
-	   	 }))
-	   	 x ++;
-	   	 if (x === 11) {
-	   	 	x = 0;
-	   	 }
-	   	 window.setTimeout(send, 1000);
-   	  } 		
-   	 window.setTimeout(send, 1000);
-   	})()
+      function send() {
+         ws.send(JSON.stringify({
+            position: x
+         }))
+         x ++;
+         if (x === 11) {
+            x = 0;
+         }
+         window.setTimeout(send, 1000);
+      }         
+     window.setTimeout(send, 1000);
+    })()
    }
 };
+ws.onclose = function () {
+    merge(state, {'connected': false})
+}
+
+
+window.addEventListener('load', function () {
+    var startX = 0;
+
+    document.body.addEventListener('touchstart', function(e){
+        console.log('touchstart', e.changedTouches[0].pageX) // alert pageX coordinate of touch point
+        e.stopPropagation();
+
+        if (state.state === 'started') {
+            ws.send(JSON.stringify({
+                position: Math.round((e.changedTouches[0].pageX / e.target.getBoundingClientRect().width) * 10)
+            }))
+        }
+
+    })
+
+    document.body.addEventListener('touchmove', function(e){
+        console.log('touchmove', e.changedTouches[0].pageX) // alert pageX coordinate of touch point
+        e.stopPropagation();
+
+        if (state.state === 'started') {
+            ws.send(JSON.stringify({
+                position: Math.round((e.changedTouches[0].pageX / e.target.getBoundingClientRect().width) * 10)
+            }))
+        }
+    }, false)
+
+    document.body.addEventListener('touchend', function(e){
+        console.log('touchend', e.changedTouches[0].pageX) // alert pageX coordinate of touch point
+        e.stopPropagation();
+        
+        if (state.state === 'started') {
+            ws.send(JSON.stringify({
+                position: Math.round((e.changedTouches[0].pageX / e.target.getBoundingClientRect().width) * 10)
+            }))
+        }
+    }, false)
+})
 
 </script>
