@@ -10,7 +10,7 @@
 //    We now use about 189 + 12 * HEIGHT bytes in 'dynamic memory' and malloc HEIGHT * WIDTH * 3 bytes on the heap (of 2560 bytes maximum), but we need to keep some space for the stack.
 
 // Using https://github.com/cpldcpu/light_ws2812/
-// This libary obviously has a memory leak (a malloc in constructor but no free in destructor) at the time of writing, but you don't want to free it anyway and then there is the AVR memory 'management' that will leave your memory fragmented...
+// This library obviously has a memory leak (a malloc in constructor but no free in destructor) at the time of writing, but you don't want to free it anyway and then there is the AVR memory 'management' that will leave your memory fragmented...
 #include <WS2812.h>
 
 // Height = pins, Width = LEDs in a cascading row/line setup
@@ -39,7 +39,7 @@ void setup() {
     // 21 = A3, 20 = A2, 19 = A1, 18 = A0
 
     const byte pins[] = {21, 20, 19, 18, 6, 5, 4, 3, 9, 8, 7};
-    // Don't bite ourselfs twice, check the height = pins at compile time:
+    // Don't bite ourselves twice, check the height = pins at compile time:
     COMPILER_ASSERT(sizeof(pins) == HEIGHT, height_equals_pins);
 
     for (int y = 0; y < HEIGHT; y++) {
@@ -62,7 +62,7 @@ void setup() {
     while (!Serial) {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                lines[y].set_crgb_at(x, x + y > distance ? bottomRight : topLeft);
+                lines[y].set_crgb_at(x, x + y < distance ? topLeft : bottomRight);
             }
         }
         for (int y = 0; y < HEIGHT; y++) {
